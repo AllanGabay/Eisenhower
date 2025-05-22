@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="storage.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         .task-card {
             transition: transform 0.2s, opacity 0.2s;
@@ -69,7 +70,7 @@
         </header>
 
         <!-- Main Matrix Grid -->
-        <div class="matrix-background grid grid-cols-1 md:grid-cols-2 gap-4" id="matrix-container">
+        <div class="matrix matrix-background" id="matrix-container">
             <!-- Quadrant 1: Important & Urgent -->
             <div class="quadrant bg-red-50 border border-red-200 rounded-lg p-4" data-quadrant="1">
                 <div class="flex justify-between items-center mb-4">
@@ -109,6 +110,7 @@
                 </div>
                 <div class="tasks-container min-h-[100px] space-y-3" id="quadrant-4-tasks"></div>
             </div>
+            <div class="matrix-center" aria-hidden="true"></div>
         </div>
 
         <!-- Task Stats -->
