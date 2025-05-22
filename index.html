@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eisenhower Matrix Task Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="storage.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .task-card {
@@ -272,11 +274,10 @@
             
             // Initialize the app
             init();
-            
-            function init() {
-                loadTasks();
+
+            async function init() {
+                await loadTasks();
                 setupEventListeners();
-                updateCategoryFilter();
             }
             
             function setupEventListeners() {
@@ -323,18 +324,15 @@
             }
             
             // Task CRUD Operations
-            function loadTasks() {
-                const savedTasks = localStorage.getItem('eisenhower-tasks');
-                if (savedTasks) {
-                    tasks = JSON.parse(savedTasks);
-                    renderTasks();
-                    updateStats();
-                    updateCategoryFilter();
-                }
+            async function loadTasks() {
+                tasks = await storage.loadTasks();
+                renderTasks();
+                updateStats();
+                updateCategoryFilter();
             }
-            
-            function saveTasks() {
-                localStorage.setItem('eisenhower-tasks', JSON.stringify(tasks));
+
+            async function saveTasks() {
+                await storage.saveTasks(tasks);
                 updateStats();
                 updateCategoryFilter();
             }
