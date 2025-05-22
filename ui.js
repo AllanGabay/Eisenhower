@@ -1,51 +1,93 @@
 export function createTaskCard(task, {onEdit, onDelete}){
   const card = document.createElement('div');
   card.className = 'task-card bg-white rounded-lg shadow p-3 border-l-4 cursor-move';
-  card.setAttribute('draggable','true');
+  card.setAttribute('draggable', 'true');
   card.setAttribute('data-task-id', task.id);
-  if(task.quadrant===1) card.classList.add('border-l-red-500');
-  else if(task.quadrant===2) card.classList.add('border-l-blue-500');
-  else if(task.quadrant===3) card.classList.add('border-l-yellow-500');
+
+  if (task.quadrant === 1) card.classList.add('border-l-red-500');
+  else if (task.quadrant === 2) card.classList.add('border-l-blue-500');
+  else if (task.quadrant === 3) card.classList.add('border-l-yellow-500');
   else card.classList.add('border-l-green-500');
-  let html = `
-    <div class="flex justify-between items-start">
-      <div class="flex-grow">
-        <div class="font-medium">${task.title}</div>
-        ${task.description?`<div class="text-sm text-gray-600 mt-1 line-clamp-2">${task.description}</div>`:''}
-      </div>
-      <div class="flex space-x-2 ml-2">
-        <button class="edit-task text-blue-500 hover:text-blue-700" data-task-id="${task.id}">
-          <i class="fas fa-edit"></i>
-        </button>
-        <button class="delete-task text-red-500 hover:text-red-700" data-task-id="${task.id}">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-    </div>
-  `;
-  html += `<div class="flex justify-between items-center mt-2 text-xs text-gray-500">`;
-  if(task.dueDate){
+
+  const top = document.createElement('div');
+  top.className = 'flex justify-between items-start';
+
+  const content = document.createElement('div');
+  content.className = 'flex-grow';
+  const title = document.createElement('div');
+  title.className = 'font-medium';
+  title.textContent = task.title;
+  content.appendChild(title);
+  if (task.description) {
+    const desc = document.createElement('div');
+    desc.className = 'text-sm text-gray-600 mt-1 line-clamp-2';
+    desc.textContent = task.description;
+    content.appendChild(desc);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'flex space-x-2 ml-2';
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-task text-blue-500 hover:text-blue-700';
+  editBtn.setAttribute('data-task-id', task.id);
+  const editIcon = document.createElement('i');
+  editIcon.className = 'fas fa-edit';
+  editBtn.appendChild(editIcon);
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'delete-task text-red-500 hover:text-red-700';
+  deleteBtn.setAttribute('data-task-id', task.id);
+  const deleteIcon = document.createElement('i');
+  deleteIcon.className = 'fas fa-trash';
+  deleteBtn.appendChild(deleteIcon);
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  top.appendChild(content);
+  top.appendChild(actions);
+
+  const bottom = document.createElement('div');
+  bottom.className = 'flex justify-between items-center mt-2 text-xs text-gray-500';
+
+  const dateInfo = document.createElement('div');
+  if (task.dueDate) {
     const dueDate = new Date(task.dueDate);
     const today = new Date();
-    today.setHours(0,0,0,0);
-    let dateClass='';
-    if(dueDate < today) dateClass='text-red-500';
-    else if(dueDate.getTime()===today.getTime()) dateClass='text-yellow-600';
-    html += `<div class="${dateClass}"><i class="far fa-calendar-alt mr-1"></i>${dueDate.toISOString().split('T')[0]}</div>`;
-  } else {
-    html += `<div></div>`;
+    today.setHours(0, 0, 0, 0);
+    let dateClass = '';
+    if (dueDate < today) dateClass = 'text-red-500';
+    else if (dueDate.getTime() === today.getTime()) dateClass = 'text-yellow-600';
+    dateInfo.className = dateClass;
+    const icon = document.createElement('i');
+    icon.className = 'far fa-calendar-alt mr-1';
+    dateInfo.appendChild(icon);
+    dateInfo.appendChild(document.createTextNode(dueDate.toISOString().split('T')[0]));
   }
-  html += `<div class="flex items-center space-x-2">`;
-  if(task.category){
-    html += `<span class="bg-gray-100 px-2 py-1 rounded">${task.category}</span>`;
+  bottom.appendChild(dateInfo);
+
+  const meta = document.createElement('div');
+  meta.className = 'flex items-center space-x-2';
+  if (task.category) {
+    const cat = document.createElement('span');
+    cat.className = 'bg-gray-100 px-2 py-1 rounded';
+    cat.textContent = task.category;
+    meta.appendChild(cat);
   }
-  if(task.recurrence){
-    html += `<span class="text-blue-500"><i class="fas fa-sync-alt"></i></span>`;
+  if (task.recurrence) {
+    const rec = document.createElement('span');
+    rec.className = 'text-blue-500';
+    const recIcon = document.createElement('i');
+    recIcon.className = 'fas fa-sync-alt';
+    rec.appendChild(recIcon);
+    meta.appendChild(rec);
   }
-  html += `</div></div>`;
-  card.innerHTML = html;
-  card.querySelector('.edit-task').addEventListener('click', () => onEdit(task.id));
-  card.querySelector('.delete-task').addEventListener('click', () => onDelete(task.id));
+  bottom.appendChild(meta);
+
+  card.appendChild(top);
+  card.appendChild(bottom);
+
+  editBtn.addEventListener('click', () => onEdit(task.id));
+  deleteBtn.addEventListener('click', () => onDelete(task.id));
+
   return card;
 }
 
