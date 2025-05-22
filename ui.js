@@ -1,13 +1,13 @@
 export function createTaskCard(task, {onEdit, onDelete}){
   const card = document.createElement('div');
-  card.className = 'task-card bg-white rounded-lg shadow p-3 border-l-4 cursor-move';
+  card.className = 'task-card rounded-lg shadow p-3 border-l-4 cursor-move';
+  if (task.quadrant === 1) card.classList.add('bg-red-50','border-l-red-500');
+  else if (task.quadrant === 2) card.classList.add('bg-blue-50','border-l-blue-500');
+  else if (task.quadrant === 3) card.classList.add('bg-yellow-50','border-l-yellow-500');
+  else card.classList.add('bg-green-50','border-l-green-500');
   card.setAttribute('draggable', 'true');
   card.setAttribute('data-task-id', task.id);
 
-  if (task.quadrant === 1) card.classList.add('border-l-red-500');
-  else if (task.quadrant === 2) card.classList.add('border-l-blue-500');
-  else if (task.quadrant === 3) card.classList.add('border-l-yellow-500');
-  else card.classList.add('border-l-green-500');
 
   const top = document.createElement('div');
   top.className = 'flex justify-between items-start';
@@ -101,5 +101,12 @@ export function updateStats(tasks){
     if(a.dueDate && b.dueDate) return new Date(a.dueDate)-new Date(b.dueDate);
     return 0;
   });
-  document.getElementById('ordered-tasks').innerHTML = ordered.map(t=>`<li>${t.title}</li>`).join('');
+  document.getElementById('ordered-tasks').innerHTML = ordered.map(t=>{
+    const info = [];
+    info.push(`<strong>${t.title}</strong>`);
+    if(t.dueDate) info.push(`due ${t.dueDate}`);
+    info.push(`priority ${t.priority}`);
+    if(t.category) info.push(t.category);
+    return `<li>${info.join(' - ')}</li>`;
+  }).join('');
 }

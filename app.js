@@ -7,6 +7,7 @@ const categoryFilter = document.getElementById('category-filter');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importFile = document.getElementById('import-file');
+const addTaskBtn = document.getElementById('add-task-btn');
 const quickTaskInput = document.getElementById('quick-task-input');
 const taskModal = document.getElementById('task-modal');
 const confirmModal = document.getElementById('confirm-modal');
@@ -41,6 +42,7 @@ function setupEventListeners(){
   exportBtn.addEventListener('click', exportTasks);
   importBtn.addEventListener('click', () => importFile.click());
   importFile.addEventListener('change', importTasks);
+  addTaskBtn.addEventListener('click', () => openTaskModal());
   quickTaskInput.addEventListener('keydown', e => {
     if(e.key === 'Enter'){
       const title = quickTaskInput.value.trim();
