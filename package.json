@@ -2,6 +2,7 @@
   "name": "eisenhower-app",
   "version": "1.0.0",
   "scripts": {
-    "test": "node tests/test.js"
+    "test": "node tests/test.js",
+    "start": "npx http-server ."
   }
 }
