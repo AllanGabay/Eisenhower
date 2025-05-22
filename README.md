@@ -1,6 +1,6 @@
 # Gestionnaire de tâches - Matrice d'Eisenhower
 
-Cette application web permet d'organiser vos tâches selon la matrice d'Eisenhower en les classant par importance et urgence. Elle fonctionne entièrement dans le navigateur et sauvegarde les données via le `localStorage`.
+Cette application web permet d'organiser vos tâches selon la matrice d'Eisenhower en les classant par importance et urgence. Elle fonctionne entièrement dans le navigateur et stocke les données grâce à **LocalForage**, qui utilise `IndexedDB` quand c'est possible et se replie sur `localStorage` si nécessaire.
 
 ## Lancer le projet en local
 
@@ -31,7 +31,13 @@ Les tâches sont échangées sous la forme d'un tableau JSON où chaque tâche p
 - **Ajout, édition et suppression** de tâches avec choix de la priorité, date d'échéance, catégorie ou récurrence.
 - **Drag & drop** pour déplacer les cartes de tâches entre les quatre quadrants.
 - **Recherche et filtre par catégorie** pour retrouver rapidement une tâche précise.
-- **Statistiques** affichant le nombre de tâches par quadrant.
+- **Statistiques** affichant le nombre de tâches par quadrant et la liste ordonnée des actions à réaliser.
 - **Import/Export** de la liste des tâches au format JSON.
+- **Fonctionnement hors ligne** grâce à la mise en cache du site via un Service Worker.
+- **Notifications** optionnelles pour rappeler les tâches dont l'échéance est proche.
 
 Cette matrice d'Eisenhower simplifie la gestion des priorités et vous aide à garder une vue claire sur vos actions à réaliser.
+
+## Licence
+
+Ce projet est distribue sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus d'informations.
