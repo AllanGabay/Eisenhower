@@ -5,8 +5,9 @@ Cette application web permet d'organiser vos tâches selon la matrice d'Eisenhow
 ## Lancer le projet en local
 
 1. Clonez ce dépôt puis ouvrez le dossier du projet.
-2. Lancez un petit serveur HTTP (par exemple `npx serve` ou `python3 -m http.server`) ou ouvrez simplement `index.html` dans votre navigateur.
-3. Vos tâches seront stockées localement et vous pourrez les exporter/importer au format JSON.
+2. Mettez vous à jour avec `git pull origin main` puis exécutez `npm test` pour vérifier le bon fonctionnement des utilitaires.
+3. Lancez ensuite un petit serveur HTTP (par exemple `npx serve` ou `python3 -m http.server`) et ouvrez `http://localhost:5000` dans votre navigateur.
+4. Vos tâches seront stockées localement et vous pourrez les exporter/importer au format JSON.
 
 ## Structure du fichier d'import/export
 

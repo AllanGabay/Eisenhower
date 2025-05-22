@@ -1,6 +1,6 @@
 body {
-	padding: 2rem;
-	font-family: -apple-system, BlinkMacSystemFont, "Arial", sans-serif;
+        padding: 2rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Arial", sans-serif;
 }
 
 h1 {
@@ -24,5 +24,16 @@ p {
 }
 
 .card p:last-child {
-	margin-bottom: 0;
+        margin-bottom: 0;
+}
+
+.task-card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+}
+
+#quick-new-task {
+        background: #fef9c3;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        border-radius: 0.5rem;
 }
