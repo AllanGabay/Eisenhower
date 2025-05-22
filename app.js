@@ -1,4 +1,4 @@
-import {setupDragAndDrop} from './drag.js';
+import {setupDragAndDrop, getGradientColor, defaultMetricsFromQuadrant} from "./drag.js";
 import {createTaskCard, updateStats} from './ui.js';
 
 const matrixContainer = document.getElementById('matrix-container');
@@ -75,6 +75,16 @@ function setupEventListeners(){
 
 async function loadTasks(){
   tasks = await storage.loadTasks();
+  tasks.forEach(t=>{
+    if(t.importance===undefined||t.urgency===undefined){
+      const m=defaultMetricsFromQuadrant(t.quadrant);
+      t.importance=m.importance;
+      t.urgency=m.urgency;
+    }
+    if(!t.color){
+      t.color=getGradientColor(t.urgency,t.importance);
+    }
+  });
   renderTasks();
   updateStats(tasks);
   updateCategoryFilter();
@@ -87,6 +97,14 @@ async function saveTasks(){
 }
 
 function addTask(task){
+  if(task.importance===undefined||task.urgency===undefined){
+    const m=defaultMetricsFromQuadrant(task.quadrant);
+    task.importance=m.importance;
+    task.urgency=m.urgency;
+  }
+  if(!task.color){
+    task.color=getGradientColor(task.urgency,task.importance);
+  }
   tasks.push(task);
   saveTasks();
   renderTasks();
@@ -95,7 +113,16 @@ function addTask(task){
 function updateTask(id, updates){
   const idx = tasks.findIndex(t=>t.id===id);
   if(idx!==-1){
-    tasks[idx] = {...tasks[idx], ...updates};
+    let task = {...tasks[idx], ...updates};
+    if(updates.quadrant && (updates.importance===undefined || updates.urgency===undefined)){
+      const m = defaultMetricsFromQuadrant(updates.quadrant);
+      task.importance = m.importance;
+      task.urgency = m.urgency;
+    }
+    if(task.urgency!==undefined && task.importance!==undefined && !updates.color){
+      task.color = getGradientColor(task.urgency, task.importance);
+    }
+    tasks[idx] = task;
     saveTasks();
     renderTasks();
   }
@@ -203,9 +230,13 @@ function saveTask(e){
     priority,
     category: category || null,
     recurrence: recurrence || null,
-    quadrant: quadrant? parseInt(quadrant): calculateQuadrant(priority, dueDate),
+    quadrant: quadrant ? parseInt(quadrant) : calculateQuadrant(priority, dueDate),
     createdAt: new Date().toISOString()
   };
+  const m = defaultMetricsFromQuadrant(data.quadrant);
+  data.importance = m.importance;
+  data.urgency = m.urgency;
+  data.color = getGradientColor(data.urgency, data.importance);
   if(taskId) updateTask(taskId, data); else addTask(data);
   closeTaskModal();
 }
@@ -284,6 +315,16 @@ function importTasks(e){
       if(Array.isArray(imported)){
         const existingIds = tasks.map(t=>t.id);
         const newTasks = imported.filter(t=>!existingIds.includes(t.id));
+        newTasks.forEach(t=>{
+          if(t.importance===undefined||t.urgency===undefined){
+            const m=defaultMetricsFromQuadrant(t.quadrant);
+            t.importance=m.importance;
+            t.urgency=m.urgency;
+          }
+          if(!t.color){
+            t.color=getGradientColor(t.urgency,t.importance);
+          }
+        });
         tasks = [...tasks, ...newTasks];
         saveTasks();
         renderTasks();

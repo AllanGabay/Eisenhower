@@ -1,10 +1,11 @@
 export function createTaskCard(task, {onEdit, onDelete}){
   const card = document.createElement('div');
   card.className = 'task-card rounded-lg shadow p-3 border-l-4 cursor-move';
-  if (task.quadrant === 1) card.classList.add('bg-red-50','border-l-red-500');
-  else if (task.quadrant === 2) card.classList.add('bg-blue-50','border-l-blue-500');
-  else if (task.quadrant === 3) card.classList.add('bg-yellow-50','border-l-yellow-500');
-  else card.classList.add('bg-green-50','border-l-green-500');
+  if(card.style) card.style.backgroundColor = task.color || ""; else card.setAttribute("style", "background-color: " + (task.color || ""));
+  if (task.quadrant === 1) card.classList.add("border-l-red-500");
+  else if (task.quadrant === 2) card.classList.add("border-l-blue-500");
+  else if (task.quadrant === 3) card.classList.add("border-l-yellow-500");
+  else card.classList.add("border-l-green-500");
   card.setAttribute('draggable', 'true');
   card.setAttribute('data-task-id', task.id);
 
