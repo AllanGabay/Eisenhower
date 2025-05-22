@@ -24,22 +24,39 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
     }
   });
 
+  matrixContainer.addEventListener('dragover', e => {
+    e.preventDefault();
+    if(draggedTask){
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const quad = el ? el.closest('.quadrant') : null;
+      if(quad){
+        const q = parseInt(quad.getAttribute('data-quadrant'));
+        draggedTask.style.backgroundColor = colorMap[q];
+      } else {
+        draggedTask.style.backgroundColor = '';
+      }
+    }
+  });
+
+  matrixContainer.addEventListener('dragleave', () => {
+    if(draggedTask){
+      draggedTask.style.backgroundColor = '';
+    }
+  });
+
   document.querySelectorAll('.quadrant').forEach(quadrant => {
     quadrant.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       quadrant.classList.add('highlight');
-      if(draggedTask){
-        const q = parseInt(quadrant.getAttribute('data-quadrant'));
-        draggedTask.style.backgroundColor = colorMap[q];
-      }
+      const indicator = quadrant.querySelector('.drop-indicator');
+      if(indicator) indicator.classList.remove('hidden');
     });
 
     quadrant.addEventListener('dragleave', () => {
       quadrant.classList.remove('highlight');
-      if(draggedTask){
-        draggedTask.style.backgroundColor = '';
-      }
+      const indicator = quadrant.querySelector('.drop-indicator');
+      if(indicator) indicator.classList.add('hidden');
     });
 
     quadrant.addEventListener('drop', e => {
@@ -55,6 +72,8 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
         }
         draggedTask.style.backgroundColor = '';
       }
+      const indicator = quadrant.querySelector('.drop-indicator');
+      if(indicator) indicator.classList.add('hidden');
     });
   });
 }
