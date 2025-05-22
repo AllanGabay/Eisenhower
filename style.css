@@ -37,3 +37,36 @@ p {
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         border-radius: 0.5rem;
 }
+
+/* Matrix grid layout */
+.matrix {
+        display: grid;
+        grid-template-areas:
+                'q1'
+                'q2'
+                'q3'
+                'q4';
+        gap: 1rem;
+}
+
+@media (min-width: 768px) {
+        .matrix {
+                grid-template-columns: 1fr 2.5rem 1fr;
+                grid-template-rows: 1fr 2.5rem 1fr;
+                grid-template-areas:
+                        'q1 . q2'
+                        '. center .'
+                        'q3 . q4';
+        }
+}
+
+.matrix [data-quadrant="1"] { grid-area: q1; }
+.matrix [data-quadrant="2"] { grid-area: q2; }
+.matrix [data-quadrant="3"] { grid-area: q3; }
+.matrix [data-quadrant="4"] { grid-area: q4; }
+
+.matrix-center {
+        grid-area: center;
+        border: 2px dashed #ccc;
+        background: #f9fafb;
+}
