@@ -7,6 +7,7 @@ const categoryFilter = document.getElementById('category-filter');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importFile = document.getElementById('import-file');
+const addTaskBtn = document.getElementById('add-task-btn');
 const quickTaskInput = document.getElementById('quick-task-input');
 const taskModal = document.getElementById('task-modal');
 const confirmModal = document.getElementById('confirm-modal');
@@ -41,6 +42,7 @@ function setupEventListeners(){
   exportBtn.addEventListener('click', exportTasks);
   importBtn.addEventListener('click', () => importFile.click());
   importFile.addEventListener('change', importTasks);
+  addTaskBtn.addEventListener('click', () => openTaskModal());
   quickTaskInput.addEventListener('keydown', e => {
     if(e.key === 'Enter'){
       const title = quickTaskInput.value.trim();
@@ -85,6 +87,8 @@ async function saveTasks(){
 }
 
 function addTask(task){
+  if(task.x===undefined) task.x = 20;
+  if(task.y===undefined) task.y = 20;
   tasks.push(task);
   saveTasks();
   renderTasks();
@@ -225,30 +229,19 @@ function deleteTaskConfirmed(){
 }
 
 function renderTasks(){
-  for(let i=1;i<=4;i++){
-    const container = document.getElementById(`quadrant-${i}-tasks`);
-    container.innerHTML='';
-  }
+  const overlay = document.getElementById('task-overlay');
+  overlay.innerHTML='';
   const filtered = tasks.filter(task=>{
     const matchesSearch = searchTerm==='' || task.title.toLowerCase().includes(searchTerm) || (task.description && task.description.toLowerCase().includes(searchTerm));
     const matchesCategory = selectedCategory==='' || (task.category && task.category===selectedCategory);
     return matchesSearch && matchesCategory;
   });
   filtered.forEach(task=>{
-    const container = document.getElementById(`quadrant-${task.quadrant}-tasks`);
-    if(container) container.appendChild(createTaskCard(task,{onEdit: id=>{
+    const card = createTaskCard(task,{onEdit: id=>{
       const t = tasks.find(t=>t.id===id); if(t) openTaskModal(t);
-    }, onDelete: id=>openConfirmModal(id)}));
+    }, onDelete: id=>openConfirmModal(id)});
+    overlay.appendChild(card);
   });
-  for(let i=1;i<=4;i++){
-    const container = document.getElementById(`quadrant-${i}-tasks`);
-    if(container.children.length===0){
-      const emptyMsg=document.createElement('div');
-      emptyMsg.className='text-center text-gray-500 py-4';
-      emptyMsg.textContent='(No tasks)';
-      container.appendChild(emptyMsg);
-    }
-  }
 }
 
 function filterTasks(){

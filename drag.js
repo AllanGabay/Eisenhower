@@ -1,79 +1,88 @@
-export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updateStats){
-  let draggedTask = null;
-  const colorMap = {
-    1: '#fecaca', // red-200
-    2: '#bfdbfe', // blue-200
-    3: '#fef9c3', // yellow-200
-    4: '#bbf7d0'  // green-200
-  };
+export function setupDragAndDrop(container, getTaskById, updateTask, updateStats){
+  let dragged = null;
+  let offsetX = 0;
+  let offsetY = 0;
 
-  matrixContainer.addEventListener('dragstart', e => {
+  container.addEventListener('dragstart', e => {
     if(e.target.classList.contains('task-card')){
-      draggedTask = e.target;
-      e.target.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', e.target.getAttribute('data-task-id'));
+      dragged = e.target;
+      const rect = e.target.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
       e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', e.target.getAttribute('data-task-id'));
+      e.target.classList.add('dragging');
     }
   });
 
-  matrixContainer.addEventListener('dragend', e => {
+  container.addEventListener('dragend', e => {
     if(e.target.classList.contains('task-card')){
       e.target.classList.remove('dragging');
-      e.target.style.backgroundColor = '';
-      draggedTask = null;
+      dragged = null;
     }
   });
 
-  matrixContainer.addEventListener('dragover', e => {
+  container.addEventListener('dragover', e => {
     e.preventDefault();
-    if(draggedTask){
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      const quad = el ? el.closest('.quadrant') : null;
-      if(quad){
-        const q = parseInt(quad.getAttribute('data-quadrant'));
-        draggedTask.style.backgroundColor = colorMap[q];
-      } else {
-        draggedTask.style.backgroundColor = '';
-      }
+    if(dragged){
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+      const relX = clamp(x / rect.width, 0, 1);
+      const relY = clamp(y / rect.height, 0, 1);
+      const color = getColor(relX, relY);
+      dragged.style.left = x + 'px';
+      dragged.style.top = y + 'px';
+      dragged.style.backgroundColor = color;
     }
   });
 
-  matrixContainer.addEventListener('dragleave', () => {
-    if(draggedTask){
-      draggedTask.style.backgroundColor = '';
+  container.addEventListener('drop', e => {
+    e.preventDefault();
+    if(dragged){
+      const taskId = dragged.getAttribute('data-task-id');
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left - offsetX;
+      const y = e.clientY - rect.top - offsetY;
+      const relX = clamp(x / rect.width, 0, 1);
+      const relY = clamp(y / rect.height, 0, 1);
+      const color = getColor(relX, relY);
+      const quadrant = determineQuadrant(relX, relY);
+      dragged.style.left = x + 'px';
+      dragged.style.top = y + 'px';
+      dragged.style.backgroundColor = color;
+      updateTask(taskId, {x, y, color, quadrant});
+      updateStats();
     }
   });
+}
 
-  document.querySelectorAll('.quadrant').forEach(quadrant => {
-    quadrant.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      quadrant.classList.add('highlight');
-      const indicator = quadrant.querySelector('.drop-indicator');
-      if(indicator) indicator.classList.remove('hidden');
-    });
+function clamp(v, min, max){
+  return Math.min(Math.max(v, min), max);
+}
 
-    quadrant.addEventListener('dragleave', () => {
-      quadrant.classList.remove('highlight');
-      const indicator = quadrant.querySelector('.drop-indicator');
-      if(indicator) indicator.classList.add('hidden');
-    });
+function blend(c1, c2, t){
+  return [
+    c1[0] + (c2[0]-c1[0])*t,
+    c1[1] + (c2[1]-c1[1])*t,
+    c1[2] + (c2[2]-c1[2])*t
+  ];
+}
 
-    quadrant.addEventListener('drop', e => {
-      e.preventDefault();
-      quadrant.classList.remove('highlight');
-      if(draggedTask){
-        const taskId = e.dataTransfer.getData('text/plain');
-        const newQuadrant = parseInt(quadrant.getAttribute('data-quadrant'));
-        const task = getTaskById(taskId);
-        if(task && task.quadrant !== newQuadrant){
-          updateTask(taskId, {quadrant: newQuadrant});
-          updateStats();
-        }
-        draggedTask.style.backgroundColor = '';
-      }
-      const indicator = quadrant.querySelector('.drop-indicator');
-      if(indicator) indicator.classList.add('hidden');
-    });
-  });
+function getColor(x, y){
+  const tl = [254,202,202];
+  const tr = [191,219,254];
+  const bl = [254,249,195];
+  const br = [187,247,208];
+  const top = blend(tl, tr, x);
+  const bottom = blend(bl, br, x);
+  const rgb = blend(top, bottom, y);
+  return `rgb(${rgb.map(v=>Math.round(v)).join(',')})`;
+}
+
+function determineQuadrant(x, y){
+  if(x < 0.5 && y < 0.5) return 1;
+  if(x >= 0.5 && y < 0.5) return 2;
+  if(x < 0.5 && y >= 0.5) return 3;
+  return 4;
 }

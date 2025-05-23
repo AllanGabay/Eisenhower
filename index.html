@@ -63,6 +63,9 @@
                 <button id="import-btn" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                     <i class="fas fa-upload mr-2"></i>Import
                 <input type="file" id="import-file" class="hidden" accept=".json">
+                <button id="add-task-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>New Task
+                </button>
                 <div id="quick-new-task" class="px-4 py-2 bg-yellow-100 rounded-lg shadow flex-grow">
                     <input id="quick-task-input" type="text" placeholder="Add a task and press Enter" class="w-full bg-transparent outline-none">
                 </div>
@@ -70,7 +73,8 @@
         </header>
 
         <!-- Main Matrix Grid -->
-        <div class="matrix matrix-background" id="matrix-container">
+        <div class="matrix matrix-background relative" id="matrix-container">
+            <div id="task-overlay" class="absolute inset-0"></div>
             <!-- Quadrant 1: Important & Urgent -->
             <div class="quadrant bg-red-50 border border-red-200 rounded-lg p-4" data-quadrant="1">
                 <div class="flex justify-between items-center mb-4">

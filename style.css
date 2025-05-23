@@ -28,6 +28,8 @@ p {
 }
 
 .task-card {
+        position: absolute;
+        cursor: move;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border-radius: 0.5rem;
 }
@@ -40,6 +42,7 @@ p {
 
 /* Matrix grid layout */
 .matrix {
+        position: relative;
         display: grid;
         grid-template-areas:
                 'q1'
@@ -69,4 +72,9 @@ p {
         grid-area: center;
         border: 2px dashed #ccc;
         background: #f9fafb;
+}
+
+#task-overlay {
+        position: absolute;
+        inset: 0;
 }
