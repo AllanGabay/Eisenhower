@@ -77,3 +77,32 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
     });
   });
 }
+
+export function setupVerticalBoard(board, getTaskById, updateTask){
+  let draggedTask = null;
+  board.addEventListener('dragstart', e => {
+    if(e.target.classList.contains('task-card')){
+      draggedTask = e.target;
+      e.dataTransfer.setData('text/plain', e.target.getAttribute('data-task-id'));
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  });
+
+  board.addEventListener('dragend', () => {
+    draggedTask = null;
+  });
+
+  board.addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+
+  board.addEventListener('drop', e => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData('text/plain');
+    if(taskId){
+      const rect = board.getBoundingClientRect();
+      const y = e.clientY - rect.top + board.scrollTop;
+      updateTask(taskId, { y });
+    }
+  });
+}

@@ -70,3 +70,18 @@ p {
         border: 2px dashed #ccc;
         background: #f9fafb;
 }
+
+/* Simple vertical board for free positioning */
+.vertical-board {
+        position: relative;
+        border: 2px dashed #e5e7eb;
+        min-height: 500px;
+}
+
+.vertical-board .task-card {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: calc(100% - 1rem);
+        margin: 0 0.5rem;
+}
