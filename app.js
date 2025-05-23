@@ -1,3 +1,6 @@
++19
+-22
+
 import {setupVerticalBoard} from './drag.js';
 import {createTaskCard, updateStats} from './ui.js';
 
@@ -76,6 +79,16 @@ function setupEventListeners(){
 
 async function loadTasks(){
   tasks = await storage.loadTasks();
+  tasks.forEach(t=>{
+    if(t.importance===undefined||t.urgency===undefined){
+      const m=defaultMetricsFromQuadrant(t.quadrant);
+      t.importance=m.importance;
+      t.urgency=m.urgency;
+    }
+    if(!t.color){
+      t.color=getGradientColor(t.urgency,t.importance);
+    }
+  });
   renderTasks();
   updateStats(tasks);
   updateCategoryFilter();
@@ -88,6 +101,14 @@ async function saveTasks(){
 }
 
 function addTask(task){
+  if(task.importance===undefined||task.urgency===undefined){
+    const m=defaultMetricsFromQuadrant(task.quadrant);
+    task.importance=m.importance;
+    task.urgency=m.urgency;
+  }
+  if(!task.color){
+    task.color=getGradientColor(task.urgency,task.importance);
+  }
   tasks.push(task);
   saveTasks();
   renderTasks();
@@ -96,7 +117,16 @@ function addTask(task){
 function updateTask(id, updates){
   const idx = tasks.findIndex(t=>t.id===id);
   if(idx!==-1){
-    tasks[idx] = {...tasks[idx], ...updates};
+    let task = {...tasks[idx], ...updates};
+    if(updates.quadrant && (updates.importance===undefined || updates.urgency===undefined)){
+      const m = defaultMetricsFromQuadrant(updates.quadrant);
+      task.importance = m.importance;
+      task.urgency = m.urgency;
+    }
+    if(task.urgency!==undefined && task.importance!==undefined && !updates.color){
+      task.color = getGradientColor(task.urgency, task.importance);
+    }
+    tasks[idx] = task;
     saveTasks();
     renderTasks();
   }
@@ -279,6 +309,16 @@ function importTasks(e){
       if(Array.isArray(imported)){
         const existingIds = tasks.map(t=>t.id);
         const newTasks = imported.filter(t=>!existingIds.includes(t.id));
+        newTasks.forEach(t=>{
+          if(t.importance===undefined||t.urgency===undefined){
+            const m=defaultMetricsFromQuadrant(t.quadrant);
+            t.importance=m.importance;
+            t.urgency=m.urgency;
+          }
+          if(!t.color){
+            t.color=getGradientColor(t.urgency,t.importance);
+          }
+        });
         tasks = [...tasks, ...newTasks];
         saveTasks();
         renderTasks();

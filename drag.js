@@ -1,11 +1,32 @@
+export const cornerColors = {
+  tl: [254,202,202],
+  tr: [191,219,254],
+  bl: [254,249,195],
+  br: [187,247,208]
+};
+
+export function getGradientColor(urgency, importance){
+  const {tl,tr,bl,br} = cornerColors;
+  const r = tl[0]*urgency*importance + tr[0]*(1-urgency)*importance +
+            bl[0]*urgency*(1-importance) + br[0]*(1-urgency)*(1-importance);
+  const g = tl[1]*urgency*importance + tr[1]*(1-urgency)*importance +
+            bl[1]*urgency*(1-importance) + br[1]*(1-urgency)*(1-importance);
+  const b = tl[2]*urgency*importance + tr[2]*(1-urgency)*importance +
+            bl[2]*urgency*(1-importance) + br[2]*(1-urgency)*(1-importance);
+  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+export function defaultMetricsFromQuadrant(q){
+  switch(q){
+    case 1: return {importance:1, urgency:1};
+    case 2: return {importance:1, urgency:0};
+    case 3: return {importance:0, urgency:1};
+    default: return {importance:0, urgency:0};
+  }
+}
+
 export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updateStats){
   let draggedTask = null;
-  const colorMap = {
-    1: '#fecaca', // red-200
-    2: '#bfdbfe', // blue-200
-    3: '#fef9c3', // yellow-200
-    4: '#bbf7d0'  // green-200
-  };
 
   matrixContainer.addEventListener('dragstart', e => {
     if(e.target.classList.contains('task-card')){
@@ -19,7 +40,8 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
   matrixContainer.addEventListener('dragend', e => {
     if(e.target.classList.contains('task-card')){
       e.target.classList.remove('dragging');
-      e.target.style.backgroundColor = '';
+      const task = getTaskById(e.target.getAttribute('data-task-id'));
+      if(task) e.target.style.backgroundColor = task.color;
       draggedTask = null;
     }
   });
@@ -27,20 +49,19 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
   matrixContainer.addEventListener('dragover', e => {
     e.preventDefault();
     if(draggedTask){
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      const quad = el ? el.closest('.quadrant') : null;
-      if(quad){
-        const q = parseInt(quad.getAttribute('data-quadrant'));
-        draggedTask.style.backgroundColor = colorMap[q];
-      } else {
-        draggedTask.style.backgroundColor = '';
-      }
+      const rect = matrixContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const urgency = 1 - x / rect.width;
+      const importance = 1 - y / rect.height;
+      draggedTask.style.backgroundColor = getGradientColor(urgency, importance);
     }
   });
 
   matrixContainer.addEventListener('dragleave', () => {
     if(draggedTask){
-      draggedTask.style.backgroundColor = '';
+      const task = getTaskById(draggedTask.getAttribute('data-task-id'));
+      if(task) draggedTask.style.backgroundColor = task.color;
     }
   });
 
@@ -65,12 +86,15 @@ export function setupDragAndDrop(matrixContainer, getTaskById, updateTask, updat
       if(draggedTask){
         const taskId = e.dataTransfer.getData('text/plain');
         const newQuadrant = parseInt(quadrant.getAttribute('data-quadrant'));
-        const task = getTaskById(taskId);
-        if(task && task.quadrant !== newQuadrant){
-          updateTask(taskId, {quadrant: newQuadrant});
-          updateStats();
-        }
-        draggedTask.style.backgroundColor = '';
+        const rect = matrixContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const urgency = 1 - x / rect.width;
+        const importance = 1 - y / rect.height;
+        const color = getGradientColor(urgency, importance);
+        updateTask(taskId, {quadrant:newQuadrant, urgency, importance, color});
+        updateStats();
+        draggedTask.style.backgroundColor = color;
       }
       const indicator = quadrant.querySelector('.drop-indicator');
       if(indicator) indicator.classList.add('hidden');
