@@ -1,7 +1,10 @@
-import {setupDragAndDrop, getGradientColor, defaultMetricsFromQuadrant} from "./drag.js";
++19
+-22
+
+import {setupVerticalBoard} from './drag.js';
 import {createTaskCard, updateStats} from './ui.js';
 
-const matrixContainer = document.getElementById('matrix-container');
+const boardContainer = document.getElementById('board-container');
 const searchInput = document.getElementById('search-input');
 const categoryFilter = document.getElementById('category-filter');
 const exportBtn = document.getElementById('export-btn');
@@ -27,7 +30,7 @@ async function init(){
   setupEventListeners();
   requestNotificationPermission();
   scheduleNotifications();
-  setupDragAndDrop(matrixContainer, id => tasks.find(t=>t.id===id), updateTask, () => updateStats(tasks));
+  setupVerticalBoard(boardContainer, id => tasks.find(t=>t.id===id), updateTask);
 }
 
 function setupEventListeners(){
@@ -56,6 +59,7 @@ function setupEventListeners(){
           category: null,
           recurrence: null,
           quadrant: 4,
+          y: 0,
           createdAt: new Date().toISOString()
         });
         quickTaskInput.value='';
@@ -230,13 +234,10 @@ function saveTask(e){
     priority,
     category: category || null,
     recurrence: recurrence || null,
-    quadrant: quadrant ? parseInt(quadrant) : calculateQuadrant(priority, dueDate),
+    quadrant: quadrant? parseInt(quadrant): calculateQuadrant(priority, dueDate),
+    y: taskId ? (tasks.find(t=>t.id===taskId)?.y || 0) : 0,
     createdAt: new Date().toISOString()
   };
-  const m = defaultMetricsFromQuadrant(data.quadrant);
-  data.importance = m.importance;
-  data.urgency = m.urgency;
-  data.color = getGradientColor(data.urgency, data.importance);
   if(taskId) updateTask(taskId, data); else addTask(data);
   closeTaskModal();
 }
@@ -258,30 +259,23 @@ function deleteTaskConfirmed(){
 }
 
 function renderTasks(){
-  for(let i=1;i<=4;i++){
-    const container = document.getElementById(`quadrant-${i}-tasks`);
-    container.innerHTML='';
-  }
+  boardContainer.innerHTML='';
   const filtered = tasks.filter(task=>{
-    const matchesSearch = searchTerm==='' || task.title.toLowerCase().includes(searchTerm) || (task.description && task.description.toLowerCase().includes(searchTerm));
-    const matchesCategory = selectedCategory==='' || (task.category && task.category===selectedCategory);
+    const matchesSearch = searchTerm==='' ||
+      task.title.toLowerCase().includes(searchTerm) ||
+      (task.description && task.description.toLowerCase().includes(searchTerm));
+    const matchesCategory = selectedCategory==='' ||
+      (task.category && task.category===selectedCategory);
     return matchesSearch && matchesCategory;
   });
   filtered.forEach(task=>{
-    const container = document.getElementById(`quadrant-${task.quadrant}-tasks`);
-    if(container) container.appendChild(createTaskCard(task,{onEdit: id=>{
-      const t = tasks.find(t=>t.id===id); if(t) openTaskModal(t);
-    }, onDelete: id=>openConfirmModal(id)}));
+    const card = createTaskCard(task, {
+      onEdit: id=>{ const t = tasks.find(t=>t.id===id); if(t) openTaskModal(t); },
+      onDelete: id=>openConfirmModal(id)
+    });
+    card.style.top = (task.y||0)+'px';
+    boardContainer.appendChild(card);
   });
-  for(let i=1;i<=4;i++){
-    const container = document.getElementById(`quadrant-${i}-tasks`);
-    if(container.children.length===0){
-      const emptyMsg=document.createElement('div');
-      emptyMsg.className='text-center text-gray-500 py-4';
-      emptyMsg.textContent='(No tasks)';
-      container.appendChild(emptyMsg);
-    }
-  }
 }
 
 function filterTasks(){
